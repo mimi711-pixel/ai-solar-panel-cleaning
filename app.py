@@ -52,13 +52,19 @@ def train_models(df):
     y = df['Action']
     y_eff = df['Efficiency']
 
-clf = DecisionTreeClassifier(
-    max_depth=4,
-    min_samples_leaf=6,
-    class_weight="balanced",
-    random_state=1
-)
+    clf = DecisionTreeClassifier(
+        max_depth=4,
+        min_samples_leaf=6,
+        class_weight="balanced",
+        random_state=1
+    )
     clf.fit(X, y)
+
+    reg = LinearRegression()
+    reg.fit(X, y_eff)
+
+    return clf, reg
+
 
     reg = LinearRegression()
     reg.fit(X, y_eff)
