@@ -1,9 +1,9 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 from sklearn.tree import DecisionTreeClassifier, export_text
 from sklearn.linear_model import LinearRegression
-import matplotlib.pyplot as plt
 
 st.set_page_config(page_title="AI Solar Panel Cleaning Optimizer (UAE)", layout="centered")
 
