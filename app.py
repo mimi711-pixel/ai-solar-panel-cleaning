@@ -145,7 +145,7 @@ if st.button("Predict Cleaning"):
 fi = pd.Series(
     clf.feature_importances_,
     index=input_df.columns
-).sort_values(ascending=False)
+sort_values(ascending=False)
 
 st.bar_chart(fi)
 
