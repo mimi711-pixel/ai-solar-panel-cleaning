@@ -151,13 +151,36 @@ st.bar_chart(fi)
 
 
 # ---- Data preview and diagnostics ----
-with st.expander("View synthetic training data (first 20 rows)"):
-    st.dataframe(df.head(20))
+if st.button("Predict Cleaning"):
+    action = int(clf.predict(input_df)[0])
+    eff_pred = float(reg.predict(input_df)[0])
 
-with st.expander("Model diagnostics"):
-    st.write("Decision tree max depth: 5 (demo). Consider replacing synthetic data with real sensor logs.")
-    st.write(f"Training samples: {len(df)}")
-    st.write("Action thresholds (used when generating synthetic labels): eff < 8 -> No Cleaning, 8 <= eff < 18 -> Clean Soon, eff >= 18 -> Clean Now")
+    probs = clf.predict_proba(input_df)[0]
+    actions = {
+        0: "🟢 No Cleaning Needed",
+        1: "🟠 Clean Soon",
+        2: "🔴 Clean Now"
+    }
 
-st.markdown("---")
-st.caption("Note: This is a demo using synthetic data. For production use, collect historical panel output and cleaning logs and retrain the models.")
+    st.subheader("AI Recommendation")
+    st.markdown(f"**{actions[action]}**")
+    st.markdown(f"- Predicted efficiency loss: **{eff_pred:.2f}**")
+    st.markdown(f"- Model confidence: **{probs[action]*100:.1f}%**")
+
+    prob_df = pd.DataFrame({
+        "Action": ["No Cleaning", "Clean Soon", "Clean Now"],
+        "Probability": probs
+    })
+    st.table(prob_df.style.format({"Probability": "{:.2%}"}))
+
+    st.subheader("Decision Tree Rules (excerpt)")
+    tree_text = export_text(clf, feature_names=list(input_df.columns))
+    st.code(tree_text)
+
+    st.subheader("Feature importances")
+    fi = pd.Series(
+        clf.feature_importances_,
+        index=input_df.columns
+    ).sort_values(ascending=False)
+
+    st.bar_chart(fi)
