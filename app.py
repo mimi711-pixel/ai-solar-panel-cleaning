@@ -52,7 +52,12 @@ def train_models(df):
     y = df['Action']
     y_eff = df['Efficiency']
 
-    clf = DecisionTreeClassifier(max_depth=5, random_state=1)
+clf = DecisionTreeClassifier(
+    max_depth=4,
+    min_samples_leaf=6,
+    class_weight="balanced",
+    random_state=1
+)
     clf.fit(X, y)
 
     reg = LinearRegression()
@@ -60,7 +65,46 @@ def train_models(df):
 
     return clf, reg
 
-df = generate_synthetic_data()
+@st.cache_data(show_spinner=False)
+def generate_synthetic_data(seed=1, days=240):
+    np.random.seed(seed)
+    data = []
+    days_clean = 0
+
+    for day in range(1, days + 1):
+        dust_l = np.random.choice([1, 2, 3], p=[0.33, 0.34, 0.33])
+        wind_s = np.random.randint(3, 16)
+        temp_c = np.random.randint(30, 46)
+        days_clean += 1
+
+        # Stronger efficiency loss model (more separation)
+        eff = (
+            dust_l * 7.5 +
+            days_clean * 1.1 -
+            wind_s * 0.35 +
+            (temp_c - 30) * 0.15 +
+            np.random.normal(0, 0.8)
+        )
+        eff = max(0, eff)
+
+        # Clear class boundaries
+        if eff < 9:
+            action = 0        # No Cleaning
+        elif eff < 17:
+            action = 1        # Clean Soon
+        else:
+            action = 2        # Clean Now
+
+        if action == 2:
+            days_clean = 0
+
+        data.append([dust_l, wind_s, temp_c, days_clean, eff, action])
+
+    df = pd.DataFrame(
+        data,
+        columns=['Dust', 'Wind', 'Temp', 'Days', 'Efficiency', 'Action']
+    )
+    return df
 clf, reg = train_models(df)
 
 # ---- Prediction ----
