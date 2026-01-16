@@ -141,12 +141,14 @@ if st.button("Predict Cleaning"):
     st.code(tree_text, language="")
 
     # Simple explanation: top features
-    st.subheader("Feature importances")
-    fi = pd.Series(clf.feature_importances_, index=input_df.columns).sort_values(ascending=False)
-    fig, ax = plt.subplots()
-    fi.plot(kind="bar", ax=ax)
-    ax.set_ylabel("Importance")
-    st.pyplot(fig)
+   st.subheader("Feature importances")
+fi = pd.Series(
+    clf.feature_importances_,
+    index=input_df.columns
+).sort_values(ascending=False)
+
+st.bar_chart(fi)
+
 
 # ---- Data preview and diagnostics ----
 with st.expander("View synthetic training data (first 20 rows)"):
